@@ -1,4 +1,3 @@
-
 import TurndownService from "turndown";
 
 (() => {
@@ -22,7 +21,7 @@ import TurndownService from "turndown";
     strongDelimiter: "**",
     linkStyle: "inlined",
     preformattedCode: "true",
-    // blankReplacement: {
+    // blankReplacement: { // TODO: Figure out how to handle blank lines, which Tana doesn't like
     //   filter: '',
     //   replacement: function (content) {
     //     return '';
