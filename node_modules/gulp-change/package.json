@@ -1,0 +1,31 @@
+{
+  "name": "gulp-change",
+  "version": "1.0.2",
+  "description": "allow file content manipulations",
+  "main": "index.js",
+  "scripts": {
+    "test": "grunt test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PoliteJS/gulp-change"
+  },
+  "keywords": [
+    "gulp",
+    "change",
+    "file",
+    "content",
+    "modify",
+    "static",
+    "analysis"
+  ],
+  "author": "PoliteJS",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PoliteJS/gulp-change/issues"
+  },
+  "homepage": "https://github.com/PoliteJS/gulp-change",
+  "dependencies": {
+    "event-stream": "^4.0.1"
+  }
+}

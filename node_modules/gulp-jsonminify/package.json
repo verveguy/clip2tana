@@ -1,0 +1,21 @@
+{
+  "name": "gulp-jsonminify",
+  "version": "1.1.0",
+  "description": "Minifies blocks of JSON-like content into valid JSON by removing all whitespace and comments.",
+  "main": "index.js",
+  "repository": "https://github.com/tcarlsen/gulp-jsonminify.git",
+  "dependencies": {
+    "jsonminify": "~0.2.3",
+    "plugin-error": "^0.1.2",
+    "through2": "~0.6.5"
+  },
+  "keywords": [
+    "gulpplugin",
+    "json",
+    "minify",
+    "jsonminify",
+    "gulp"
+  ],
+  "author": "tcarlsen",
+  "license": "MIT"
+}
