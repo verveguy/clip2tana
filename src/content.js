@@ -13,6 +13,8 @@ import rangy from "rangy";
     }
   }
 
+  // This rule constructs url to be absolute URLs for links & images
+
   const markdownService = new TurndownService({
     headingStyle: "atx",
     hr: "---",
@@ -28,7 +30,20 @@ import rangy from "rangy";
     //     return '';
     //   }
     // }
-  });
+  }).addRule('baseUrl', {
+    filter: ['a', 'img'],
+    replacement: function (content, el, options) {
+        if (el.nodeName === 'IMG') {
+            const link =  el.getAttributeNode('src').value;
+            const fullLink = new URL(link, url)
+            return `![${content}](${fullLink.href})`
+        } else if (el.nodeName === 'A') {
+            const link =  el.getAttributeNode('href').value;
+            const fullLink = new URL(link, url)
+            return `[${content}](${fullLink.href})`
+        }
+    }
+});
 
   let data = `%%tana%%\n- ${title} #website\n  - Description:: ${description}\n  - Url:: ${url}`;
 
