@@ -10,6 +10,7 @@ chrome.action.onClicked.addListener(async (tab) => {
 
 chrome.runtime.onInstalled.addListener(() => {
   console.log("Installed clip2tana");
+  // mark our extension to say we're alive
   // chrome.action.setBadgeText({
   //   text: "WOKE",
   // });
