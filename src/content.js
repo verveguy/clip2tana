@@ -63,6 +63,15 @@ import rangy from "rangy";
         }
         html = container.innerHTML;
       }
+      else {
+        console.log("No apparent selection - attempting MSOffice class selection");
+        const selection = document.getElementsByClassName('Selected');
+        console.log(selection);
+        const container = document.createElement("div");
+        for (const node of selection) {
+          container.appendChild(node.cloneContents());
+        }
+        html = container.innerHTML;      }
     } else if (typeof document.selection != "undefined") {
       if (document.selection.type == "Text") {
         html = document.selection.createRange().htmlText;
