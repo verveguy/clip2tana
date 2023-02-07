@@ -47,9 +47,11 @@
             {
                 "name": "content",
                 "src": "./src/content.js"
-            }        ]
+            }
+        ]
     },
     "dependencies": {
+        "rangy": "^1.3.1",
         "turndown": "^7.1.1"
     }
 }
