@@ -14,7 +14,7 @@
         "clipboardWrite"
     ],
     "icons": {
-        "128": "assets/img/128x128.png"
+        "128": "assets/img/tana-128.png"
     },
     "action": {
         "default_icon": {
