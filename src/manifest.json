@@ -18,9 +18,11 @@
     },
     "action": {
         "default_icon": {
-            "16": "assets/img/16x16.png",
-            "24": "assets/img/24x24.png",
-            "32": "assets/img/32x32.png"
+            "16": "assets/img/tana-16.png",
+            "24": "assets/img/tana-24.png",
+            "32": "assets/img/tana-32.png",
+            "128": "assets/img/tana-128.png",
+            "512": "assets/img/tana-512.png"
         },
         "default_title": "__MSG_appName__"
     },
