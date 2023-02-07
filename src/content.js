@@ -1,5 +1,4 @@
 import TurndownService from "turndown";
-import rangy from "rangy";
 
 (() => {
   const title = document.title;
@@ -47,11 +46,6 @@ import rangy from "rangy";
 
   let data = `%%tana%%\n- ${title} #website\n  - Description:: ${description}\n  - Url:: ${url}`;
 
-  // rangy seems poorly maintained at this time
-  function getSelectedHTMRangy() {
-    return rangy.getSelection().toHtml();
-  }
-  
   function getSelectedHTML() {
     let html = "";
     if (typeof window.getSelection != "undefined") {
