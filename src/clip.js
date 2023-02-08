@@ -1,3 +1,7 @@
+/* 
+  clip.js prepares the HTML as markdown in tana-paste format
+*/
+
 import TurndownService from "turndown";
 
 export function clipHTML(html) {

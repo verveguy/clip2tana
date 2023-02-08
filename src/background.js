@@ -1,3 +1,11 @@
+/* 
+  background.js is the web worker code, which is basically "faceless" from a
+  browser tab perspective.
+
+  From here we execute the content.js script against the active tab when the 
+  extension is invoked.
+*/
+
 chrome.action.onClicked.addListener(async (tab) => {
   console.log("got click");
   await chrome.scripting.executeScript(
