@@ -41,6 +41,7 @@ import { clipHTML } from "./clip";
 
         // TODO: this doesn't actually work unless you do it in the java
         // debug console. Why?
+        // See open question https://stackoverflow.com/questions/75378711/how-to-get-selected-text-in-office365-word-document-from-within-a-chrome-extensi
         const selection = document.getElementsByClassName('Selected');
         console.log(selection);
         const container = document.createElement("div");
