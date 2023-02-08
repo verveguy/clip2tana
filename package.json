@@ -2,7 +2,7 @@
     "name": "clip2tana",
     "description": "Clips current webpage and selection to tana-paste format",
     "version": "0.0.1",
-    "homepage": "http://chrome.google.com/webstore",
+    "homepage": "https://github.com/verveguy/clip2tana",
     "author": "Brett Adam",
     "repository": {
         "type": "git",

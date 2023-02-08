@@ -2,6 +2,10 @@
 
 Clips current webpage and selection to tana-paste format
 
+To bootstrap this git repo into Chrome locally, first clone the repo.
+Then run `npm install` and `npm run build`. 
+Got to Chrome extension manager, turn on Developer mode and `load unpacked` the `dist` directory.
+
 ## Development 
 
 This extension was created with [Extension CLI](https://oss.mobilefirst.me/extension-cli/)!
