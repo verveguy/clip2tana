@@ -4,7 +4,7 @@ Clips current webpage and selection to tana-paste format
 
 To bootstrap this git repo into Chrome locally, first clone the repo.
 Then run `npm install` and `npm run build`. 
-Got to Chrome extension manager, turn on Developer mode and `load unpacked` the `dist` directory.
+Go to Chrome extension manager, turn on Developer mode and `load unpacked` the `dist` directory.
 
 The format used on the clipboard is very simple:
 
