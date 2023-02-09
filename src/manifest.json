@@ -14,15 +14,15 @@
         "clipboardWrite"
     ],
     "icons": {
-        "128": "assets/img/tana-128.png"
+        "128": "assets/img/clip2tana-128.png"
     },
     "action": {
         "default_icon": {
-            "16": "assets/img/tana-16.png",
-            "24": "assets/img/tana-24.png",
-            "32": "assets/img/tana-32.png",
-            "128": "assets/img/tana-128.png",
-            "512": "assets/img/tana-512.png"
+            "16": "assets/img/clip2tana-16.png",
+            "24": "assets/img/clip2tana-24.png",
+            "32": "assets/img/clip2tana-32.png",
+            "128": "assets/img/clip2tana-128.png",
+            "512": "assets/img/clip2tana-512.png"
         },
         "default_title": "__MSG_appName__"
     },
