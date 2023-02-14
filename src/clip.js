@@ -5,6 +5,9 @@
 import TurndownService from "turndown";
 
 export function clipHTML(html) {
+  // this seems to help avoid "DOMException: not focused" errors from time to time
+  // ref: Stackoverflow 
+  window.focus();
   // grab the basic info from the page
   const title = document.title;
   const url = window.location.href;
