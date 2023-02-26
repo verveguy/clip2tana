@@ -12,17 +12,58 @@ export function clipHTML(html) {
   const title = document.title;
   const url = window.location.href;
   let description = "";
+
+  // basic format of a tana-paste entry
+  let data = `%%tana%%\n- ${title} #website`;
+
+  let fields = [];
+  fields.push(`\n  - Url:: ${url}`);
+
   const metaTags = document.querySelectorAll("meta");
+
   for (const element of metaTags) {
     if (element.name === "description") {
       description = element.content;
-      break;
+      fields.push("\n  - Description:: " + description);
+    } else {
+      let property = element.getAttribute("property");
+      let content = element.content;
+      if (property === "og:description") {
+        // no point in duplicating the description
+        if (content != description) {
+          fields.push("\n  - og:Description:: " + content);
+        }
+      }
+      if (property === "og:title") {
+        // no point in duplicating the title
+        if (content !== title) {
+          fields.push("\n  - og:Title:: " + content);
+        }
+      }
+      if (property === "og:url") {
+        // no point in duplicating the url
+        if (content != url) {
+          fields.push("\n  - og:Url:: " + content);
+        }
+      }
+      if (property === "og:type") {
+        fields.push("\n  - og:Type:: " + content);
+      }
+      if (property === "og:image") {
+        fields.push("\n  - og:Image:: " + content);
+      }
+
+      if (property === "og:site_name") {
+        fields.push("\n  - og:Site:: " + content);
+      }
     }
   }
 
-  // basic format of a tana-paste entry
-  let data = `%%tana%%\n- ${title} #website\n  - Description:: ${description}\n  - Url:: ${url}`;
-  
+  fields.forEach((field) => {
+    console.log(field);
+    data += field;
+  });
+
   // do we have selected text as well?
   if (html) {
     // convert html to markdown
