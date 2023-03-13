@@ -2,6 +2,10 @@
 
 Clips current webpage and selection to tana-paste format
 
+# Installing without building
+If you just want to use this extension without bothering with the source code and all that jazz, you can download the latest `release.zip` file from the `Releases` area (right hand side of the github project page). Then, go to the Chrome extension manager (`chrome://extensions`) and turn on `Developer mode`. This will give you access to `Load unpacked` button and you can pick the downloaded zip file.
+
+# Building from source
 To bootstrap this git repo into Chrome locally, first clone the repo.
 Then run `npm install` and `npm run build`. 
 Go to Chrome extension manager, turn on Developer mode and `load unpacked` the `dist` directory.
