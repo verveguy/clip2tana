@@ -15,11 +15,11 @@ The utility grabs the following information for the current tab:
   - og:type
   - og:image
   - og:site_name
-- <any selected text>
+- `<any selected text>`
 
-The utility then checks the URL (<href.origin>) to see if the current tab is the root of the site or not. This allows multiple 'web pages' to be tied to a single root 'website' using a Part Of relationship in Tana.
+The utility then checks the URL (`<href.origin>`) to see if the current tab is the root of the site or not. This allows multiple 'web pages' to be tied to a single root 'website' using a Part Of relationship in Tana.
 
-It also determines the 'type' of page by checking the og:type tag and parsing the URL for a filename or extension, then sets one of the following supertags for the node:
+It also determines the 'type' of page by checking the `og:type` tag and parsing the URL for a filename or extension, then sets one of the following supertags for the node:
 - #article
 - #book
 - #video
@@ -29,7 +29,7 @@ It also determines the 'type' of page by checking the og:type tag and parsing th
 
 Then the information is formatted as a Tana Paste entry and copied to the clipboard.
 
-# Formatting
+## Formatting
 
 The basic Tana Paste data copied to the clipboard is the following:
 
@@ -51,7 +51,7 @@ The basic Tana Paste data copied to the clipboard is the following:
     - <line breaks are preserved for multiple lines>
 ```
 
-For posterity's sake, if the original meta tag differs from the cleaned up version, both will be included on their own lines. (i.e. - Description:: <cleaned up description> and - og:Description:: <original unchanged meta tag> may both be listed so you can compare them.)
+For posterity's sake, if the original meta tag differs from the cleaned up version, both will be included on their own lines. (i.e. `- Description:: <cleaned up description>` and `- og:Description:: <original unchanged meta tag>` may both be included fields so you can compare them.)
 
 
 # Installing without building
