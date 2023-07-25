@@ -1,4 +1,6 @@
-# clip2tana
+# clip2tana-jb
+
+*Forked from Brett Adams' awesome initial version so I could add a few customizations 😁*
 
 Clips current webpage and selection to tana-paste format
 

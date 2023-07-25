@@ -1,12 +1,12 @@
 {
-    "name": "clip2tana",
+    "name": "clip2tana-jb",
     "description": "Clips current webpage and selection to tana-paste format",
     "version": "0.0.1",
-    "homepage": "https://github.com/verveguy/clip2tana",
-    "author": "Brett Adam",
+    "homepage": "https://github.com/aubirdgine/clip2tana-jb",
+    "author": "Forked from Brett Adam, customized by Aubirdgine",
     "repository": {
         "type": "git",
-        "url": "ENTER GIT REPO URL"
+        "url": "https://github.com/aubirdgine/clip2tana-jb.git"
     },
     "scripts": {
         "start": "xt-build -e dev -w",
