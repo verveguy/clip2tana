@@ -1,3 +1,6 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
+// @ts-nocheck
 /* 
   clip.js prepares the HTML as markdown in tana-paste format
 */
@@ -203,4 +206,4 @@ console.log(tanaPasteData);
       console.error("Error copying data to clipboard: ", err);
     }
   );
-};
+}
