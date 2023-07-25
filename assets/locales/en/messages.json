@@ -1,9 +1,9 @@
 {
     "appName": {
-        "message": "clip2tana"
+        "message": "clip2tana-jb"
     },
     "appShortName": {
-        "message": "clip2tana"
+        "message": "clip2tana-jb"
     },
     "appDescription": {
         "message": "Clips current webpage and selection to tana-paste format"
