@@ -32,8 +32,8 @@ export function clipHTML(html) {
   // convert a string to title case
   const titleCase = (str) => str.replace(/\b\S/g, (t) => t.toUpperCase());
 
+  // grab and process the meta tags
   const metaTags = document.querySelectorAll("meta");
-
   for (const element of metaTags) {
     if (element.name === "description") {
       pgDescription = element.content.trim();
@@ -164,7 +164,7 @@ if (!is_root) {
   // if clipped page is not the root page...
   // add tana reference/link to origin site
   const originRef = `[[${originTitle}]]`;
-  fields.push(`\n  - Part Of Website:: ${originRef}`);
+  fields.push(`\n  - Root Site:: ${originRef}`);
 
   // attempt to find filename and extension
   const pgFilename = pgPath.split('/').pop();
@@ -194,7 +194,11 @@ fields.forEach((field) => {
   // console.log(field);
   tanaPasteData += field;
 });
-tanaPasteData += highlights.join('');
+
+// add the highlights if there are any
+if (highlights.length > 1) {
+  tanaPasteData += highlights.join('');
+}
 console.log(tanaPasteData);
 
   // copy the result to the clipboard
