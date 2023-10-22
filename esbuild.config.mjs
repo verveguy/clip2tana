@@ -24,11 +24,11 @@ const res = await build({
       resolveFrom: 'cwd',
       assets: [
         {
-          from: ['./assets/img/*.png'],
+          from: ['./src/assets/img/*.png'],
           to: ['./dist/assets/img/'],
         },
         {
-          from: ['./assets/locales/**'],
+          from: ['./src/assets/locales/**'],
           to: ['./dist/_locales/'],
         },
         {

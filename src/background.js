@@ -112,22 +112,3 @@ async function sendInvokeMessage(message, tab = undefined) {
   return { response, tab };
 }
 
-// We wrap the command invocation with get/set clipboard
-// since that the only way to get data in/out of the Tana
-// app at the moment. Note that we wrap the result 
-// with the tana paste `%%tana%%` sentinel. So make sure
-// your commands generate tana-paste format output
-
-async function doCommand(commandFunction) {
-  let { response, tab } = await sendInvokeMessage({ command: "get-clipboard" });
-  let clipboard = response.clipboard;
-
-  // munge the clipboard data
-  let data = await commandFunction(clipboard, configuration);
-  data = "%%tana%%\n" + data;
-
-  await sendInvokeMessage({ command: "set-clipboard", clipboard: data }, tab);
-}
-
-
-

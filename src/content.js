@@ -31,7 +31,7 @@ function listenForMessages(request, sender, sendResponse) {
   // helper messages for getting/setting clipboard
   if (request.command === "clip2tana") {
     clipHTML(getSelectedHTML(), params);
-    return true; // signal that we will send async responses
+    return false; // signal that we will NOT send async responses
   }
   else if (request.command === "get-clipboard") {
     navigator.clipboard.readText()
