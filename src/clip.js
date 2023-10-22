@@ -4,7 +4,7 @@
 
 import TurndownService from "turndown";
 
-export function clipHTML(html) {
+export function clipHTML(html, params) {
   // this seems to help avoid "DOMException: not focused" errors from time to time
   // ref: Stackoverflow 
   window.focus();
@@ -14,7 +14,7 @@ export function clipHTML(html) {
   let description = "";
 
   // basic format of a tana-paste entry
-  let data = `%%tana%%\n- ${title} #website`;
+  let data = `%%tana%%\n- ${title} ${params.webtag}`;
 
   let fields = [];
   fields.push(`\n  - Url:: ${url}`);
@@ -25,7 +25,9 @@ export function clipHTML(html) {
     if (element.name === "description") {
       description = element.content;
       fields.push("\n  - Description:: " + description);
-    } else {
+    }
+    // should we grab OpenGeraph properties?
+    else if (params.copyOpenGraph) {
       let property = element.getAttribute("property");
       let content = element.content;
       if (property === "og:description") {

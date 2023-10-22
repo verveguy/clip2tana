@@ -3,16 +3,11 @@
     "short_name": "__MSG_appShortName__",
     "description": "__MSG_appDescription__",
     "homepage_url": "http://chrome.google.com/webstore",
-    "version": "0.0.1",
-    "version_name": "0.0.1",
+    "version": "0.0.2",
+    "version_name": "0.0.2",
     "manifest_version": 3,
     "default_locale": "en",
     "minimum_chrome_version": "88",
-    "permissions": [
-        "scripting",
-        "activeTab",
-        "clipboardWrite"
-    ],
     "icons": {
         "128": "assets/img/clip2tana-128.png"
     },
@@ -24,16 +19,45 @@
             "128": "assets/img/clip2tana-128.png",
             "512": "assets/img/clip2tana-512.png"
         },
-        "default_title": "__MSG_appName__"
+        "default_title": "__MSG_appName__",
+        "default_popup": "popup.html"
     },
     "background": {
         "service_worker": "background.js"
     },
+    "content_scripts": [
+        {
+            "js": [
+                "content.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "inject.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ]
+        }
+    ],
+    "permissions": [
+        "storage",
+        "scripting",
+        "activeTab",
+        "clipboardRead",
+        "clipboardWrite"
+    ],
     "commands": {
-        "_execute_action": {
+        "clip2tana": {
+            "description": "Clip current tab",
             "suggested_key": {
-                "default": "Ctrl+Shift+K",
-                "mac": "Command+Shift+K"
+                "default": "Ctrl+Shift+P",
+                "mac": "Command+Shift+P"
             }
         }
     }

@@ -1,56 +1,49 @@
 {
     "name": "clip2tana",
     "description": "Clips current webpage and selection to tana-paste format",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "homepage": "https://github.com/verveguy/clip2tana",
     "author": "Brett Adam",
     "repository": {
         "type": "git",
-        "url": "ENTER GIT REPO URL"
+        "url": "https://github.com/verveguy/clip2tana"
     },
     "scripts": {
-        "start": "xt-build -e dev -w",
-        "start:firefox": "xt-build -e dev -p firefox -w",
-        "build": "xt-build -e prod",
-        "build:firefox": "xt-build -e prod -p firefox",
-        "clean": "xt-clean",
-        "docs": "xt-docs",
-        "test": "xt-test",
-        "coverage": "nyc --reporter=lcov npm run test",
-        "sync": "xt-sync"
-    },
-    "babel": {
-        "presets": [
-            "@babel/preset-env"
-        ]
+        "build": "rimraf dist && node esbuild.config.mjs",
+        "watch": "watch 'yarn build' src"
     },
     "eslintIgnore": [
         "test/**/*"
     ],
-    "devDependencies": {
-        "extension-cli": "latest"
-    },
-    "xtdocs": {
-        "source": {
-            "include": [
-                "README.md",
-                "src"
-            ]
-        }
-    },
-    "xtbuild": {
-        "js_bundles": [
-            {
-                "name": "background",
-                "src": "./src/background.js"
-            },
-            {
-                "name": "content",
-                "src": "./src/content.js"
-            }
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
         ]
     },
     "dependencies": {
+        "@emotion/react": "^11.11.1",
+        "@emotion/styled": "^11.11.0",
+        "@mui/icons-material": "^5.14.14",
+        "@mui/material": "^5.14.14",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
         "turndown": "^7.1.1"
+    },
+    "devDependencies": {
+        "@types/chrome": "^0.0.224",
+        "@types/react-dom": "^18.2.14",
+        "babel-plugin-styled-components": "^2.0.7",
+        "esbuild": "^0.18.6",
+        "esbuild-plugin-copy": "^2.1.1",
+        "rimraf": "^5.0.5",
+        "ts-loader": "^9.4.2",
+        "watch": "^1.0.2"
     }
 }
