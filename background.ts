@@ -56,7 +56,6 @@ chrome.tabs.onActivated.addListener(function () {
   //feedbackActivated = false
   getCurrentTab()
     .then((tab) => {
-      ;
       currentTab = tab;
       console.log("Background current tab is now", currentTab);
     });
@@ -73,6 +72,9 @@ chrome.commands.onCommand.addListener((command) => {
   // chrome tab process. Note we do not expect a response from
   // this message
   console.log("Background got extension command: " + command);
+  // close popup if it's open
+      //   chrome.runtime.sendMessage({"tana-clip-done"});
+
   askContentScript({ command: "clip2tana", configuration: configuration })
     .then(() => { console.log("Background command action complete"); });
 });
@@ -83,31 +85,29 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   console.log("Background got request", request);
   if (sender.tab) {
     console.log("Background got message from content.js: " + request);
-    // // what kind of requests do we need to service?
-    // if (request === "selection-changed") {
-    //   // and forward to our popup, if it's alive
-    //   chrome.runtime.sendMessage({command: "selection-refreshed"});
-    //   // let content_request = { command: "get-tanapaste", configuration: configuration };
-    //   // askContentScript(content_request)
-    //   //   .then((result) => {
-    //   //     console.log("Refreshed selection", result);
-    //   //     // and forward to our popup, if it's alive
-    //   //     chrome.runtime.sendMessage({command: "selection-refreshed", selection: result});
-    //   //   });
-    // }
+    // what kind of requests do we need to service?
+    if (request === "selection-changed") {
+      currentTab = sender.tab;
+    }
     return false; // signal that we will NOT send async responses
   }
   else {
     // request is from an extension page
     console.log("Background got relayed request from popup", request);
-    if (request.command === "clip2tana") {
+    if (request.command === "get-tanapaste") {
       // relay the clip request
       let content_request = { command: "get-tanapaste", configuration: request.configuration };
       askContentScript(content_request)
         .then((result) => {
           console.log("Background message action complete with result", result);
-          sendResponse(result);
+          if (result) {
+            sendResponse(result);
+          }
+          else {
+            sendResponse({ result: "get-tanapaste-result", selection: "(cannot read current tab)" });
+          }
         });
+      return true; // signal that we will send async responses
     }
     else if (request.command === "set-clipboard") {
       // relay the clip request
@@ -116,6 +116,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           console.log("Background message action complete with result", result);
           sendResponse(result);
         });
+      return true; // signal that we will send async responses
     }
   }
 });
@@ -146,8 +147,6 @@ chrome.action.onClicked.addListener(async (tab) => {
         console.log("Background click action complete", result);
       });
   }
-
-  return;
 });
 
 
@@ -166,7 +165,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 async function getCurrentTab() {
   console.log("Background getting current tab");
-  let queryOptions = { active: true, lastFocusedWindow: true };
+  let queryOptions = { active: true, currentWindow: true };
   // `tab` will either be a `tabs.Tab` instance or `undefined`.
   let [tab] = await chrome.tabs.query(queryOptions);
   console.log("Background got current tab: ", tab);

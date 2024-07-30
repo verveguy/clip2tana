@@ -1,7 +1,7 @@
 {
   "name": "clip2tana",
   "displayName": "Clip2tana",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Clips current webpage and selection to tana-paste format",
   "author": "Brett Adam",
   "scripts": {
@@ -38,7 +38,7 @@
     "permissions": [
       "storage",
       "scripting",
-      "activeTab",
+      "tabs",
       "clipboardRead",
       "clipboardWrite"
     ],

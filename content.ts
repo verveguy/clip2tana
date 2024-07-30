@@ -24,6 +24,7 @@ import { configure } from "./Configuration";
 document.addEventListener("selectionchange", () => {
   console.log("Selection changed");
   chrome.runtime.sendMessage("selection-changed");
+  return false;
 });
 
 function listenForMessages(request, sender, sendResponse) {
@@ -55,6 +56,7 @@ function listenForMessages(request, sender, sendResponse) {
     return true; // signal that we will send async responses
   }
   else if (request.command === "get-clipboard") {
+    // just retrieve whatever is on the clipboard currently
     navigator.clipboard.readText()
       .then((result) => {
         sendResponse({ result: "get-clipboard-result", clipboard: result });
@@ -62,6 +64,7 @@ function listenForMessages(request, sender, sendResponse) {
     return true; // signal that we will send async responses
   }
   else if (request.command === "set-clipboard") {
+    // put request data on the clipboard
     let data = request.clipboard;
     navigator.clipboard.writeText(data)
       .then(() => {

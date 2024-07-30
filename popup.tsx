@@ -60,14 +60,14 @@ function ClipPopup() {
   // TODO: replace this with plasmo message API wrapper
   useEffect(() => {
     if (fetchClipping) {
-      console.log("Popup sending clip2tana");
+      console.log("Popup sending get-tanapaste");
       // invoke clip2tana to grab current tab selection, etc
-      askServiceWorker({ command: "clip2tana", configuration: configuration })
+      askServiceWorker({ command: "get-tanapaste", configuration: configuration })
         .then((response) => {
           console.log(response);
           setData(response.selection);
           setFetchClipping(false)
-          console.log("Popup clip2tana complete");
+          console.log("Popup get-tanapaste complete");
         });
     }
   }, [fetchClipping]);
