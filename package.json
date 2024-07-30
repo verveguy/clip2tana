@@ -1,7 +1,7 @@
 {
   "name": "clip2tana",
   "displayName": "Clip2tana",
-  "version": "0.1.0",
+  "version": "0.1.0b1",
   "description": "Clips current webpage and selection to tana-paste format",
   "author": "Brett Adam",
   "scripts": {
