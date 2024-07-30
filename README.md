@@ -24,36 +24,37 @@ Note that selections in Google Docs and Office365 docs do NOT work. (See issues)
 
 ## Development 
 
-This extension was created with [Extension CLI](https://oss.mobilefirst.me/extension-cli/)!
+This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
-If you find this software helpful [star](https://github.com/MobileFirstLLC/extension-cli/) or [sponsor](https://github.com/sponsors/MobileFirstLLC) this project.
+## Getting Started
 
+First, run the development server:
 
-### Available Commands
+```bash
+pnpm dev
+# or
+npm run dev
+```
 
-| Commands | Description |
-| --- | --- |
-| `npm run start` | build extension, watch file changes |
-| `npm run build` | generate release version |
-| `npm run docs` | generate source code docs |
-| `npm run clean` | remove temporary files |
-| `npm run test` | run unit tests |
-| `npm run sync` | update config files |
+Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
 
-For CLI instructions see [User Guide &rarr;](https://oss.mobilefirst.me/extension-cli/)
+You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
 
-### Learn More
+For further guidance, [visit our Documentation](https://docs.plasmo.com/)
 
-**Extension Developer guides**
+## Making production build
 
-- [Getting started with extension development](https://developer.chrome.com/extensions/getstarted)
-- Manifest configuration: [version 2](https://developer.chrome.com/extensions/manifest) - [version 3](https://developer.chrome.com/docs/extensions/mv3/intro/)
-- [Permissions reference](https://developer.chrome.com/extensions/declare_permissions)
-- [Chrome API reference](https://developer.chrome.com/docs/extensions/reference/)
+Run the following:
 
-**Extension Publishing Guides**
+```bash
+pnpm build
+# or
+npm run build
+```
 
-- [Publishing for Chrome](https://developer.chrome.com/webstore/publish)
-- [Publishing for Edge](https://docs.microsoft.com/en-us/microsoft-edge/extensions-chromium/publish/publish-extension)
-- [Publishing for Opera addons](https://dev.opera.com/extensions/publishing-guidelines/)
-- [Publishing for Firefox](https://extensionworkshop.com/documentation/publish/submitting-an-add-on/)
+This should create a production bundle for your extension, ready to be zipped and published to the stores.
+
+## Submit to the webstores
+
+The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+

@@ -11,15 +11,20 @@
 */
 
 import { clipHTML } from "./clip";
-import { configure } from "./Clip2Tana";
+import { configure } from "./Configuration";
 
 // inject our code that runs inside the main world
-let inject = document.createElement('script');
-inject.src = chrome.runtime.getURL('inject.js');
-inject.onload = function() {
-    inject.remove();  // TODO: check this. Original was this.remove()
-};
-(document.head || document.documentElement).appendChild(inject);
+// let inject = document.createElement('script');
+// inject.src = chrome.runtime.getURL('inject.js');
+// inject.onload = function() {
+//     inject.remove();  // TODO: check this. Original was this.remove()
+// };
+// (document.head || document.documentElement).appendChild(inject);
+
+document.addEventListener("selectionchange", () => {
+  console.log("Selection changed");
+  chrome.runtime.sendMessage("selection-changed");
+});
 
 function listenForMessages(request, sender, sendResponse) {
   const params = configure(request?.configuration);
@@ -30,8 +35,24 @@ function listenForMessages(request, sender, sendResponse) {
 
   // helper messages for getting/setting clipboard
   if (request.command === "clip2tana") {
-    clipHTML(getSelectedHTML(), params);
+    let data = clipHTML(getSelectedHTML(), params);
+    // add put the result on the clipboard
+    navigator.clipboard.writeText(data).then(
+      function () {
+        console.log("Successfully copied data to clipboard");
+      },
+      function (err) {
+        console.error("Error copying data to clipboard: ", err);
+      }
+    );
     return false; // signal that we will NOT send async responses
+  }
+  else if (request.command === "get-tanapaste") {
+    // just grab the selection as tana paste format, but don't touch the clipboard
+    let data = clipHTML(getSelectedHTML(), params);
+    console.log("Got selection as tana paste format: ", data);
+    sendResponse({ result: "get-tanapaste-result", selection: data });
+    return true; // signal that we will send async responses
   }
   else if (request.command === "get-clipboard") {
     navigator.clipboard.readText()
@@ -72,16 +93,12 @@ function getSelectedHTML() {
       console.log(selection);
       const container = document.createElement("div");
       for (const node of selection) {
-        container.appendChild(node.cloneContents());
+        //container.appendChild(node.cloneContents());
       }
       html = container.innerHTML;
     }
   }
-  else if (typeof document.selection != "undefined") {
-    if (document.selection.type == "Text") {
-      html = document.selection.createRange().htmlText;
-    }
-  }
+
   return html;
 }
 

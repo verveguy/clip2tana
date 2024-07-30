@@ -21,7 +21,7 @@ function invokeDocumentCopy() {
       const command = event.data?.command;
       // initial invocation message handler
       if (command === "clip2tana") {
-        // console.log("GOT MESSAGE: " + event.data.command);
+        console.log("INJECT GOT MESSAGE: " + event.data.command);
         // TODO: ask the user what command to run
         // for now assume it is 'chatgpt'
         invokeDocumentCopy();

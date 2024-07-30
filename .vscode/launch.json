@@ -9,8 +9,8 @@
       "request": "launch",
       "name": "Launch Chrome to debug extensions",
       "url": "chrome://extensions/",
-      "webRoot": "${workspaceFolder}/dist",
-      "runtimeArgs": ["--load-extension=${workspaceFolder}/dist"]
+      "webRoot": "${workspaceFolder}/build/chrome-m3-dev",
+      "runtimeArgs": ["--load-extension=${workspaceFolder}/build/chrome-m3-dev"],
     }
   ]
 }
