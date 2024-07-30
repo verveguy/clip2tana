@@ -7,19 +7,20 @@
 
 import React, { useEffect, useState } from "react";
 import { FormControlLabel, FormGroup, IconButton, Switch, TextField } from "@mui/material";
-import { initial_config, merge_config} from "./Configuration";
+import { initial_config, merge_config } from "./Configuration";
 
-const ConfigurationPanel = ({closeHandler}) => {
+const ConfigurationPanel = ({ closeHandler }) => {
   const [savedState, setSavedState] = useState("Initial");
   const [shouldLoadConfig, setShouldLoadConfig] = useState(true);
   const [configuration, setConfiguration] = useState(initial_config);
 
   const saveConfiguration = (section: string, property: string, newValue: any) => {
-    configuration.config[section][property] = newValue;
+    let newconfig = configuration;
+    newconfig.config[section][property] = newValue;
     setSavedState("saving");
     chrome.storage.sync.set({ configuration }).then(() => {
       // update local react state
-      setConfiguration(configuration);
+      setConfiguration(newconfig);
       setSavedState("saved");
     });
   }
@@ -63,8 +64,14 @@ const ConfigurationPanel = ({closeHandler}) => {
   }
   else {
     return (
-      <div style={{ width: 600 }}>
-        <h2>Configuration for clip2tana</h2>
+      <div style={{ width: 600, height:'100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Configuration for clip2tana</h2>
+          <div style={{ height: 20, width: 200, display: 'flex', justifyContent: 'space-between' }}>
+            <button onClick={resetToDefaults}>Defaults</button>
+            <button onClick={closeHandler}>Done</button>
+          </div>
+        </div>
         <FormGroup>
           {configuration.schema.map((schema_elem, i) => {
             count++;
@@ -107,10 +114,6 @@ const ConfigurationPanel = ({closeHandler}) => {
             )
           })}
         </FormGroup>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <button onClick={resetToDefaults}>Defaults</button>
-          <button onClick={closeHandler}>Done</button>
-        </div>
       </div>
     );
   }

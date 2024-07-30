@@ -41,9 +41,10 @@ export function get_default_configuration() {
           },
         ],
       },
+      // ADDING FUNCTIONALITY TO PUSH TO TANA HELPER
       {
         key: "helper",
-        label: "Use Tana Helper",
+        label: "Use Tana Helper (not yet implemented)",
         properties: [
           {
             key: "usetanahelper",
@@ -55,9 +56,11 @@ export function get_default_configuration() {
           },
         ]
       },
+
+      // ADDING FUNCTIONALITY TO PUSH TO TANA INBOX API
       {
         key: "inbox",
-        label: "Inbox settings",
+        label: "Inbox settings (not yet implemented)",
         properties: [
           {
             key: "pushinbox",

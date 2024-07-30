@@ -33,39 +33,43 @@ function ClipPopup() {
   const [showSettings, setShowSettings] = useState(false);
 
   // install event handler on load
-  useEffect(() => { 
+  useEffect(() => {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-      console.log("Popup got message: ", message);
-      if (message?.command === "selection-refreshed") {
+      console.log("Popup got broadcast: ", message);
+      if (message === "selection-changed") {
         setFetchClipping(true);
       }
     });
   }, []);
-  
+
   // TODO: replace this with plasmo storage API wrapper
   useEffect(() => {
-    chrome.storage.sync.get("configuration").then((data) => {
-      if (data?.configuration) {
-        let new_config = merge_config(configuration, data.configuration);
-        console.log("popup using  configuration", new_config);
-        setConfiguration(new_config);
-      }
-      setShouldLoadConfig(false); // only try once
-      setFetchClipping(true); // now fetch the clipping
-    });
+    if (shouldLoadConfig) {
+      chrome.storage.sync.get("configuration").then((data) => {
+        if (data?.configuration) {
+          let new_config = merge_config(configuration, data.configuration);
+          console.log("popup using  configuration", new_config);
+          setConfiguration(new_config);
+        }
+        setShouldLoadConfig(false); // only try once
+        setFetchClipping(true); // now fetch the clipping
+      });
+    }
   }, [shouldLoadConfig]);
 
   // TODO: replace this with plasmo message API wrapper
   useEffect(() => {
-    console.log("Popup sending clip2tana");
-    // invoke clip2tana to grab current tab selection, etc
-    askServiceWorker({ command: "clip2tana", configuration: configuration })
-      .then((response) => {
-        console.log(response);
-        setData(response.selection);
-        setFetchClipping(false)
-        console.log("Popup clip2tana complete");
-      });
+    if (fetchClipping) {
+      console.log("Popup sending clip2tana");
+      // invoke clip2tana to grab current tab selection, etc
+      askServiceWorker({ command: "clip2tana", configuration: configuration })
+        .then((response) => {
+          console.log(response);
+          setData(response.selection);
+          setFetchClipping(false)
+          console.log("Popup clip2tana complete");
+        });
+    }
   }, [fetchClipping]);
 
   function openOptionsPage() {
@@ -113,17 +117,21 @@ function ClipPopup() {
   else {
     return (
       <div style={{ width: 600, height: '100%' }}>
-        <h2>Clip2Tana</h2>
-        <TextareaAutosize style={{ width: '100%', height: 300 }}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2>Clip2Tana</h2>
+          <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between' }}>
+            <button onClick={openOptionsPage}>Settings</button>
+            <button onClick={sendToTana} disabled={true}>Send to Tana</button>
+            <button onClick={copyToClipboard}>Copy</button>
+          </div>
+        </div>
+
+        <TextareaAutosize style={{ width: '100%' }}
           autoFocus={true}
           value={data}
           onChange={(e) => setData(e.target.value)}
         />
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <button onClick={openOptionsPage}>Settings</button>
-          <button onClick={sendToTana} disabled={true}>Send to Tana</button>
-          <button onClick={copyToClipboard}>Copy</button>
-        </div>
+
       </div>
     );
   }
