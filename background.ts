@@ -11,13 +11,13 @@
   tab and the injected content.js script generated from the React app.
 */
 
-import { initial_config, merge_config } from "./Configuration";
+import { get_default_configuration, merge_config } from "./Configuration";
 export { }
 
 // -------
 // Configuration handling
 
-let configuration = initial_config;
+let configuration = get_default_configuration();
 
 // Watch for changes to the user's configuration & apply them
 chrome.storage.onChanged.addListener((changes, area) => {
@@ -32,10 +32,10 @@ chrome.storage.onChanged.addListener((changes, area) => {
 async function readConfiguration() {
   // read our stored configuration, if any
   await chrome.storage.sync.get("configuration").then((data) => {
-    configuration = initial_config;
+    configuration = get_default_configuration();
     console.log("Initial config", configuration);
     if (data?.configuration) {
-      const new_config = merge_config(initial_config, data.configuration);
+      const new_config = merge_config(get_default_configuration(), data.configuration);
       configuration = new_config;
       console.log("Background retrieved configuration");
     }

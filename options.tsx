@@ -7,12 +7,12 @@
 
 import React, { useEffect, useState } from "react";
 import { FormControlLabel, FormGroup, IconButton, Switch, TextField } from "@mui/material";
-import { initial_config, merge_config } from "./Configuration";
+import { get_default_configuration, merge_config } from "./Configuration";
 
 const ConfigurationPanel = ({ closeHandler }) => {
   const [savedState, setSavedState] = useState("Initial");
   const [shouldLoadConfig, setShouldLoadConfig] = useState(true);
-  const [configuration, setConfiguration] = useState(initial_config);
+  const [configuration, setConfiguration] = useState(get_default_configuration());
 
   const saveConfiguration = (section: string, property: string, newValue: any) => {
     let newconfig = configuration;
@@ -37,7 +37,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
       console.log("Initial config", new_config);
       if (data?.configuration) {
         console.log("Options retrieved configuration", data.configuration);
-        new_config = merge_config(initial_config, data.configuration);
+        new_config = merge_config(get_default_configuration(), data.configuration);
       }
       console.log("Using configuration", new_config);
       setConfiguration(new_config);
@@ -47,10 +47,10 @@ const ConfigurationPanel = ({ closeHandler }) => {
 
   function resetToDefaults() {
     setSavedState("saving");
-    let configuration = initial_config;
+    let configuration = get_default_configuration();
     chrome.storage.sync.set({ configuration }).then(() => {
-      console.log("Reset default configuration", initial_config);
-      setConfiguration(initial_config);
+      console.log("Reset default configuration", configuration);
+      setConfiguration(get_default_configuration());
       setSavedState("saved");
     });
   }

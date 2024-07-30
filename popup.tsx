@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FormControlLabel, FormGroup, IconButton, Switch, TextareaAutosize, TextField } from "@mui/material";
-import { initial_config, merge_config } from "./Configuration";
+import { get_default_configuration, merge_config } from "./Configuration";
 import ConfigurationPanel from "~options";
 
 /*
@@ -27,7 +27,7 @@ async function askServiceWorker(message) {
 
 function ClipPopup() {
   const [shouldLoadConfig, setShouldLoadConfig] = useState(true);
-  const [configuration, setConfiguration] = useState(initial_config);
+  const [configuration, setConfiguration] = useState(get_default_configuration());
   const [data, setData] = useState("");
   const [fetchClipping, setFetchClipping] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
