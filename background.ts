@@ -11,6 +11,7 @@
   tab and the injected content.js script generated from the React app.
 */
 
+import { error } from "console";
 import { get_default_configuration, merge_config } from "./Configuration";
 export { }
 
@@ -76,7 +77,12 @@ chrome.commands.onCommand.addListener((command) => {
       //   chrome.runtime.sendMessage({"tana-clip-done"});
 
   askContentScript({ command: "clip2tana", configuration: configuration })
-    .then(() => { console.log("Background command action complete"); });
+    .then((response) => { 
+      if (configuration.config.inbox.pushinbox) {
+        pushDataToEndpoint(response.nodes, configuration.config.inbox.tanaapikey);
+      }
+      console.log("Background command action complete");
+    });
 });
 
 // listen for commands back from the content.js script running in the page
@@ -105,6 +111,21 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
           }
           else {
             sendResponse({ result: "get-tanapaste-result", selection: "(cannot read current tab)" });
+          }
+        });
+      return true; // signal that we will send async responses
+    }
+    else if (request.command === "get-tananodes") {
+      // relay the clip request
+      let content_request = { command: "get-tananodes", configuration: request.configuration };
+      askContentScript(content_request)
+        .then((result) => {
+          console.log("Background message action complete with result", result);
+          if (result) {
+            sendResponse(result);
+          }
+          else {
+            sendResponse({ result: "get-tananodes-result"});
           }
         });
       return true; // signal that we will send async responses
@@ -191,5 +212,33 @@ async function askContentScript(message, tab = undefined) {
     const response = await chrome.tabs.sendMessage(tab?.id, message);
     console.log("Background got response: ", response);
     return response;
+  }
+}
+
+
+const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
+
+async function pushDataToEndpoint(payload: any, token:string) {
+
+  console.log("Pushing data to endpoint", payload);
+
+  try {
+    const response = await fetch(endpointUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: 'Bearer ' + token,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      console.log("Data pushed successfully!");
+    } else {
+      const errorBody = await response.text();
+      console.error("Failed to push data:", errorBody);
+    }
+  } catch (error) {
+    console.error("An error occurred while pushing data:", error);
   }
 }

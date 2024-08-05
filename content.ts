@@ -10,7 +10,7 @@
 
 */
 
-import { clipHTML } from "./clip";
+import { clip_tana_nodes, clip_tana_paste } from "./clip";
 import { configure } from "./Configuration";
 
 // inject our code that runs inside the main world
@@ -21,11 +21,23 @@ import { configure } from "./Configuration";
 // };
 // (document.head || document.documentElement).appendChild(inject);
 
+
+// ----------------
+// Listener methods
+
+
+// update the serviceworker and the popup (if visible)
+// as the selection changes
+
 document.addEventListener("selectionchange", () => {
   console.log("Selection changed");
   chrome.runtime.sendMessage("selection-changed");
   return false;
 });
+
+
+// Main workhorse function. Listen for messages from the background.js
+// script and respond with the appropriate data.
 
 function listenForMessages(request, sender, sendResponse) {
   const params = configure(request?.configuration);
@@ -36,21 +48,38 @@ function listenForMessages(request, sender, sendResponse) {
 
   // helper messages for getting/setting clipboard
   if (request.command === "clip2tana") {
-    let data = clipHTML(getSelectedHTML(), params);
-    // add put the result on the clipboard
-    navigator.clipboard.writeText(data).then(
-      function () {
-        console.log("Successfully copied data to clipboard");
-      },
-      function (err) {
-        console.error("Error copying data to clipboard: ", err);
-      }
-    );
-    return false; // signal that we will NOT send async responses
+    if (params.inbox.pushinbox) {
+      // send the data to the inbox
+      let data = clip_tana_nodes(getSelectedHTML(), params);
+      console.log("Sending to inbox", data);
+      sendResponse({ result: "clip-tana-nodes", nodes: data });
+      return true; // signal that we WILL send async responses
+    }
+    else {
+      let data = clip_tana_paste(getSelectedHTML(), params);
+
+      // add put the result on the clipboard
+      navigator.clipboard.writeText(data).then(
+        function () {
+          console.log("Successfully copied data to clipboard");
+        },
+        function (err) {
+          console.error("Error copying data to clipboard: ", err);
+        }
+      );
+      return false; // signal that we WILL NOT send async responses
+    }
+  }
+  else if (request.command === "get-tananodes") {
+    // just grab the selection as tana paste format, but don't touch the clipboard
+    let data = clip_tana_nodes(getSelectedHTML(), params);
+    console.log("Got selection as tana nodes format: ", data);
+    sendResponse({ result: "get-tanapaste-result", nodes: data });
+    return true; // signal that we will send async responses
   }
   else if (request.command === "get-tanapaste") {
     // just grab the selection as tana paste format, but don't touch the clipboard
-    let data = clipHTML(getSelectedHTML(), params);
+    let data = clip_tana_paste(getSelectedHTML(), params);
     console.log("Got selection as tana paste format: ", data);
     sendResponse({ result: "get-tanapaste-result", selection: data });
     return true; // signal that we will send async responses
@@ -74,6 +103,12 @@ function listenForMessages(request, sender, sendResponse) {
   }
 }
 
+
+
+// ----------------
+// Helper methods
+
+// get the HTML of the current selection
 
 function getSelectedHTML() {
   let html = "";
@@ -104,6 +139,8 @@ function getSelectedHTML() {
 
   return html;
 }
+
+// Not yet used
 
 (() => {
 

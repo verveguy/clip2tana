@@ -1,12 +1,13 @@
 import type { Configuration } from "./ConfigurationTypes";
 import deepmerge from "@fastify/deepmerge";
 
+// TODO: Rework all of this with the formik schema approach
+
 const default_config =
 { // these are the actual values we use
   clip2tana: {
     webtag: "#website",
-    markdown: true,
-    opengraph: false
+    markdown: false,
   },
   helper: {
     usetanahelper: false,
@@ -14,7 +15,18 @@ const default_config =
   },
   inbox: {
     pushinbox: false,
-    tanaapikey: ""
+    supertag: '',
+    urlfieldid: '',
+    tanaapikey: '',
+  },
+  opengraph: {
+    useOpenGraph: false,
+    ogDescription: '',
+    ogTitle: '',
+    ogUrl: '',
+    ogType: '',
+    ogImage: '',
+    ogSite_Name: '',
   }
 };
 
@@ -22,7 +34,7 @@ const default_schema =
   [ // and this is the schema to drive the UX
     {
       key: "clip2tana",
-      label: "Clip control",
+      label: "Clipboard control (Tana paste)",
       properties: [
         {
           key: "webtag",
@@ -32,11 +44,69 @@ const default_schema =
           key: "markdown",
           label: "Convert HTML to markdown", type: "boolean",
         },
+      ],
+    },
+    
+
+    // ADDING FUNCTIONALITY TO PUSH TO TANA INBOX API
+    {
+      key: "inbox",
+      label: "Inbox settings",
+      properties: [
         {
-          key: "opengraph",
+          key: "pushinbox",
+          label: "Push to inbox by default", type: "boolean",
+        },
+        {
+          key: "supertag",
+          label: "Supertag Node ID", type: "string",
+        },
+        {
+          key: "urlfieldid",
+          label: "URL Field Node ID", type: "string",
+        },
+        {
+          key: "tanaapikey",
+          label: "Tana API key", type: "string",
+        },
+      ]
+    },
+
+    // OpenGraph field support
+    {
+      key: "opengraph",
+      label: "OpenGraph Field Mapping",
+        
+      properties: [
+        {
+          key: "useOpenGraph",
           label: "Copy OpenGraph meta attributes", type: "boolean",
         },
-      ],
+        {
+          key: "ogDescription",
+          label: "OpenGraph Description Field Node ID", type: "string",
+        },
+        {
+          key: "ogTitle",
+          label: "OpenGraph Title Field Node ID", type: "string",
+        },
+        {
+          key: "ogUrl",
+          label: "OpenGraph URL Field Node ID", type: "string",
+        },
+        {
+          key: "ogType",
+          label: "OpenGraph Type Field Node ID", type: "string",
+        },
+        {
+          key: "ogImage",
+          label: "OpenGraph Image Field Node ID", type: "string",
+        },
+        {
+          key: "ogSite_Name",
+          label: "OpenGraph Site Name Field Node ID", type: "string",
+        },
+      ]
     },
     // ADDING FUNCTIONALITY TO PUSH TO TANA HELPER
     {
@@ -50,22 +120,6 @@ const default_schema =
         {
           key: "helperurl",
           label: "Tana Helper URL", type: "string",
-        },
-      ]
-    },
-
-    // ADDING FUNCTIONALITY TO PUSH TO TANA INBOX API
-    {
-      key: "inbox",
-      label: "Inbox settings (not yet implemented)",
-      properties: [
-        {
-          key: "pushinbox",
-          label: "Push to inbox by default", type: "boolean",
-        },
-        {
-          key: "tanaapikey",
-          label: "Tana API key", type: "string",
         },
       ]
     },

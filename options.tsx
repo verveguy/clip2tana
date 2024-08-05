@@ -3,6 +3,9 @@
   for our Chrome Extension. It allows the user to set 
   various default configuration options including 
   the Tana supertag to use, the Tana API key, etc.
+
+  TODO: replace all of this custom form handling with
+  the formik library.
 */
 
 import React, { useEffect, useState } from "react";

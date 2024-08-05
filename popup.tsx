@@ -24,13 +24,41 @@ async function askServiceWorker(message) {
   return response;
 }
 
+const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
+
+async function pushDataToEndpoint(payload: any, token:string) {
+
+  console.log("Pushing data to endpoint", payload);
+
+  try {
+    const response = await fetch(endpointUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: 'Bearer ' + token,
+      },
+      body: JSON.stringify(payload),
+    });
+
+    if (response.ok) {
+      console.log("Data pushed successfully!");
+    } else {
+      const errorBody = await response.text();
+      console.error("Failed to push data:", errorBody);
+    }
+  } catch (error) {
+    console.error("An error occurred while pushing data:", error);
+  }
+}
 
 function ClipPopup() {
   const [shouldLoadConfig, setShouldLoadConfig] = useState(true);
   const [configuration, setConfiguration] = useState(get_default_configuration());
   const [data, setData] = useState("");
+  const [nodes, setNodes] = useState({});
   const [fetchClipping, setFetchClipping] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
+  const [disableSendtoTana, setDisableSendtoTana] = useState(false);
 
   // install event handler on load
   useEffect(() => {
@@ -50,12 +78,17 @@ function ClipPopup() {
           let new_config = merge_config(configuration, data.configuration);
           console.log("popup using  configuration", new_config);
           setConfiguration(new_config);
+          setDisableSendtoTana(!new_config.config.inbox.pushinbox)
         }
         setShouldLoadConfig(false); // only try once
         setFetchClipping(true); // now fetch the clipping
       });
     }
   }, [shouldLoadConfig]);
+
+  useEffect(() => {
+    setDisableSendtoTana(!configuration.config.inbox.pushinbox);
+  }, [configuration]);
 
   // TODO: replace this with plasmo message API wrapper
   useEffect(() => {
@@ -64,12 +97,18 @@ function ClipPopup() {
       // invoke clip2tana to grab current tab selection, etc
       askServiceWorker({ command: "get-tanapaste", configuration: configuration })
         .then((response) => {
-          console.log(response);
           setData(response.selection);
           setFetchClipping(false)
           console.log("Popup get-tanapaste complete");
         });
-    }
+
+      // also fetch the nodes version of this for inbox posting purposes
+      askServiceWorker({ command: "get-tananodes", configuration: configuration })
+        .then((response) => {
+          setNodes(response.nodes);
+          console.log("Popup get-tananodes complete");
+        });
+      }
   }, [fetchClipping]);
 
   function openOptionsPage() {
@@ -105,8 +144,19 @@ function ClipPopup() {
   function sendToTana() {
     // send to Tana Input API
     // or Tana Helper queue?
+    pushDataToEndpoint(nodes, configuration.config.inbox.tanaapikey)
+      .then(() => {
+        close();
+      });
   }
 
+  function handleTextEdit(event) {
+    setData(event.target.value);
+    // if we edit the text, we can't push to inbox anymore
+    // TODO: reparse edited text into Tana Input API structure
+    setDisableSendtoTana(true);
+  }
+  
   if (showSettings) {
     return (
       <div style={{ width: '100%', height: '100%' }}>
@@ -121,7 +171,7 @@ function ClipPopup() {
           <h2>Clip2Tana</h2>
           <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between' }}>
             <button onClick={openOptionsPage}>Settings</button>
-            <button onClick={sendToTana} disabled={true}>Send to Tana</button>
+            <button onClick={sendToTana} disabled={disableSendtoTana}>Send to Tana</button>
             <button onClick={copyToClipboard}>Copy</button>
           </div>
         </div>
@@ -129,7 +179,7 @@ function ClipPopup() {
         <TextareaAutosize style={{ width: '100%' }}
           autoFocus={true}
           value={data}
-          onChange={(e) => setData(e.target.value)}
+          onChange={handleTextEdit}
         />
 
       </div>
