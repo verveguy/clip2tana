@@ -100,6 +100,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
                           onChange={e => saveConfiguration(schema_elem.key, property_elem.key, e.target.value)}
                           variant="outlined"
                           label={property_elem.label}
+                          disabled={property_elem.disabled}
                         />
                         <div style={{ height: '12px' }} />
                       </div>
@@ -115,6 +116,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
                               onChange={e => handleToggle(schema_elem.key, property_elem.key)}
                             />}
                           label={property_elem.label}
+                          disabled={property_elem.disabled}
                         />
                         <div style={{ height: '12px' }} />
                       </div>

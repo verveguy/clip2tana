@@ -5,7 +5,7 @@ so that our UI can be dynamically generated.
 export type Configuration = { config: any, schema: ConfigSection []};
 
 export type ConfigEntry = {
-  type: string; key: string, label: string, options?: string[]
+  type: string; key: string, label: string, disabled?: false, options?: string[]
 };
 
 /* ConfigSection defines a logical "section" of a configuration, with a label and a set of properties */

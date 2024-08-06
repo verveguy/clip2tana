@@ -112,14 +112,15 @@ const default_schema =
     {
       key: "helper",
       label: "Use Tana Helper (not yet implemented)",
+      disabled: true,
       properties: [
         {
           key: "usetanahelper",
-          label: "Push to Tana Helper", type: "boolean",
+          label: "Push to Tana Helper", type: "boolean", disabled: true,
         },
         {
           key: "helperurl",
-          label: "Tana Helper URL", type: "string",
+          label: "Tana Helper URL", type: "string", disabled: true,
         },
       ]
     },
