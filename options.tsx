@@ -8,7 +8,7 @@
   the formik library.
 */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FormControlLabel, FormGroup, IconButton, Switch, TextField } from "@mui/material";
 import { get_default_configuration, merge_config } from "./Configuration";
 
@@ -16,6 +16,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
   const [savedState, setSavedState] = useState("Initial");
   const [shouldLoadConfig, setShouldLoadConfig] = useState(true);
   const [configuration, setConfiguration] = useState(get_default_configuration());
+  const divRef = useRef();
 
   const saveConfiguration = (section: string, property: string, newValue: any) => {
     let newconfig = configuration;
@@ -58,6 +59,13 @@ const ConfigurationPanel = ({ closeHandler }) => {
     });
   }
 
+  // scroll to the top, since we seem to start at the bottom...?
+  useEffect(() => {
+    const {current} = divRef;
+     if (current) {
+       current.scrollIntoView({behavior: "smooth"})
+     }
+  }, [shouldLoadConfig]);
 
   // super simple React UI at this point
   let count = 0;
@@ -67,7 +75,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
   }
   else {
     return (
-      <div style={{ width: 600, height:'100%' }}>
+      <div style={{ width: 600, height:'100%' }} ref={divRef}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Configuration for clip2tana</h2>
           <div style={{ height: 20, width: 200, display: 'flex', justifyContent: 'space-between' }}>
