@@ -6,7 +6,7 @@
   "author": "Brett Adam",
   "scripts": {
     "dev": "plasmo dev",
-    "build": "plasmo build",
+    "build": "NODE_OPTIONS='--trace-deprecation' plasmo build",
     "package": "plasmo package"
   },
   "dependencies": {
