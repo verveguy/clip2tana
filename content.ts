@@ -45,6 +45,8 @@ function listenForMessages(request, sender, sendResponse) {
 
   // tell our inject code in main world
   window.postMessage({ command: command }, "*");
+  
+  console.log("Got command", command);
 
   // helper messages for getting/setting clipboard
   if (request.command === "clip2tana") {
@@ -73,14 +75,14 @@ function listenForMessages(request, sender, sendResponse) {
   else if (request.command === "get-tananodes") {
     // just grab the selection as tana paste format, but don't touch the clipboard
     let data = clip_tana_nodes(getSelectedHTML(), params);
-    console.log("Got selection as tana nodes format: ", data);
-    sendResponse({ result: "get-tanapaste-result", nodes: data });
+    // console.log("Got selection as tana nodes format: ", data);
+    sendResponse({ result: "get-tananodes-result", nodes: data });
     return true; // signal that we will send async responses
   }
   else if (request.command === "get-tanapaste") {
     // just grab the selection as tana paste format, but don't touch the clipboard
     let data = clip_tana_paste(getSelectedHTML(), params);
-    console.log("Got selection as tana paste format: ", data);
+    // console.log("Got selection as tana paste format: ", data);
     sendResponse({ result: "get-tanapaste-result", selection: data });
     return true; // signal that we will send async responses
   }

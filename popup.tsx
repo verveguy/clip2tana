@@ -31,6 +31,7 @@ async function pushDataToEndpoint(payload: any, token:string) {
   console.log("Pushing data to endpoint", payload);
 
   try {
+    console.log("Pushing data to endpoint", JSON.stringify(payload));
     const response = await fetch(endpointUrl, {
       method: "POST",
       headers: {
@@ -44,7 +45,7 @@ async function pushDataToEndpoint(payload: any, token:string) {
       console.log("Data pushed successfully!");
     } else {
       const errorBody = await response.text();
-      console.error("Failed to push data:", errorBody);
+      console.error("Failed to push data from popup:", errorBody);
     }
   } catch (error) {
     console.error("An error occurred while pushing data:", error);
@@ -56,7 +57,7 @@ function ClipPopup() {
   const [configuration, setConfiguration] = useState(get_default_configuration());
   const [data, setData] = useState("");
   const [nodes, setNodes] = useState({});
-  const [fetchClipping, setFetchClipping] = useState(true);
+  const [fetchClipping, setFetchClipping] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [disableSendtoTana, setDisableSendtoTana] = useState(false);
 
@@ -65,7 +66,7 @@ function ClipPopup() {
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       console.log("Popup got broadcast: ", message);
       if (message === "selection-changed") {
-        setFetchClipping(true);
+        setShouldLoadConfig(true);
       }
     });
   }, []);
@@ -76,7 +77,7 @@ function ClipPopup() {
       chrome.storage.sync.get("configuration").then((data) => {
         if (data?.configuration) {
           let new_config = merge_config(configuration, data.configuration);
-          console.log("popup using  configuration", new_config);
+          console.log("popup loaded  configuration", JSON.stringify(new_config));
           setConfiguration(new_config);
           setDisableSendtoTana(!new_config.config.inbox.pushinbox)
         }
@@ -101,7 +102,7 @@ function ClipPopup() {
           setFetchClipping(false)
           console.log("Popup get-tanapaste complete");
         });
-
+      console.log("Popup sending get-tananodes with params", JSON.stringify(configuration));
       // also fetch the nodes version of this for inbox posting purposes
       askServiceWorker({ command: "get-tananodes", configuration: configuration })
         .then((response) => {
@@ -130,9 +131,12 @@ function ClipPopup() {
   }
 
   function copyToClipboard() {
-    navigator.clipboard.writeText(data).then(
+    //navigator.clipboard.writeText(data).then(
+    // Make this use the background service worker
+    // since it's not succeeding from the foreground popup context
+    askServiceWorker({ command: "set-clipboard", clipboard: data }).then(
       function () {
-        console.log("Successfully copied data to clipboard");
+        console.error("Successfully copied data to clipboard");
       },
       function (err) {
         console.error("Error copying data to clipboard: ", err);

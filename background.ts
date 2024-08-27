@@ -236,7 +236,7 @@ async function pushDataToEndpoint(payload: any, token:string) {
       console.log("Data pushed successfully!");
     } else {
       const errorBody = await response.text();
-      console.error("Failed to push data:", errorBody);
+      console.error("Failed to push data from worker:", errorBody);
     }
   } catch (error) {
     console.error("An error occurred while pushing data:", error);
