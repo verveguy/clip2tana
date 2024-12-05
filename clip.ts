@@ -174,65 +174,48 @@ const resolvePath = (object, path, defaultValue) => path
 
 export function nodes_format(title, clipping, fields, params): Payload {
   const nodes: Node[] = [];
-  const targetNodeId = 'INBOX'; // TODO: consider making this configurable
+  const targetNodeId = 'INBOX';
 
-  const node: Node = {
-    name: title,
-    supertags: [{ id: params.inbox.supertag }],
-    children: []
-  };
-
-  let descField = fields.find((field) => field[0] === 'Description');
-  let description = descField ? descField[1] : undefined
-  console.log("description", description);
-  if (description) {
-    node.description = description;
-  }
-
-  let urlField = fields.find((field) => field[0] === 'Url');
-  const url = urlField ? urlField[1] : undefined;
-  console.log("url", url);
-  if (url) {
-    const urlNode: Field = {
-      type: 'field',
-      attributeId: params.inbox.urlfieldid,
-      children: [
-        {
-          name: url
-        }
-      ]
-    };
-    node.children.push(urlNode);
-  }
-
-
-  fields.forEach((field) => {
-    const fieldID = resolvePath(params.opengraph, field[0], undefined);
-    if (!fieldID) {
-      return;
-    }
-
-    const fieldNode: Field = {
-      type: 'field',
-      attributeId: fieldID,
-      children: [
-        {
-          name: field[1]
-        }
-      ]
+  // 为每个 SuperTag 创建一个独立的节点
+  params.inbox.superTags.forEach(superTag => {
+    const node: Node = {
+      name: title,
+      supertags: [{ id: superTag.id }],
+      children: []
     };
 
-    node.children?.push(fieldNode);
-  });
-
-  // add clipping as a node but strip all newlines
-  clipping?.split('\n').forEach((para) => {
-    if (para != "</p>") {
-      node.children?.push({ name: para });
+    // 添加描述
+    let descField = fields.find((field) => field[0] === 'Description');
+    if (descField) {
+      node.description = descField[1];
     }
-  });
 
-  nodes.push(node);
+    // 为该 SuperTag 的每个 field 添加 URL
+    superTag.fields.forEach(field => {
+      let urlField = fields.find((f) => f[0] === 'Url');
+      if (urlField) {
+        const urlNode: Field = {
+          type: 'field',
+          attributeId: field.id, // 使用 field 中定义的 id
+          children: [
+            {
+              name: urlField[1]
+            }
+          ]
+        };
+        node.children.push(urlNode);
+      }
+    });
+
+    // 添加其他内容（保持不变）
+    clipping?.split('\n').forEach((para) => {
+      if (para != "</p>") {
+        node.children?.push({ name: para });
+      }
+    });
+
+    nodes.push(node);
+  });
 
   return { targetNodeId, nodes };
 }

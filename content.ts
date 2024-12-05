@@ -51,11 +51,11 @@ function listenForMessages(request, sender, sendResponse) {
   // helper messages for getting/setting clipboard
   if (request.command === "clip2tana") {
     if (params.inbox.pushinbox) {
-      // send the data to the inbox
+      // 修改为支持多个 superTag 的数据结构
       let data = clip_tana_nodes(getSelectedHTML(), params);
       console.log("Sending to inbox", data);
       sendResponse({ result: "clip-tana-nodes", nodes: data });
-      return true; // signal that we WILL send async responses
+      return true;
     }
     else {
       let data = clip_tana_paste(getSelectedHTML(), params);

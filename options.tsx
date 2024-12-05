@@ -9,8 +9,10 @@
 */
 
 import React, { useEffect, useRef, useState } from "react";
-import { FormControlLabel, FormGroup, IconButton, Switch, TextField } from "@mui/material";
+import { FormControlLabel, FormGroup, IconButton, Switch, TextField, Card, Typography, Box, Button, Tabs, Tab } from "@mui/material";
 import { get_default_configuration, merge_config } from "./Configuration";
+import DeleteIcon from '@mui/icons-material/Delete';
+import AddIcon from '@mui/icons-material/Add';
 
 const ConfigurationPanel = ({ closeHandler }) => {
   const [savedState, setSavedState] = useState("Initial");
@@ -70,6 +72,40 @@ const ConfigurationPanel = ({ closeHandler }) => {
   // super simple React UI at this point
   let count = 0;
 
+  const handleUpdateSuperTag = (index: number, updatedTag: any) => {
+    let newconfig = {...configuration};
+    newconfig.config.inbox.superTags[index] = updatedTag;
+    setSavedState("saving");
+    chrome.storage.sync.set({ configuration: newconfig }).then(() => {
+      setConfiguration(newconfig);
+      setSavedState("saved");
+    });
+  };
+
+  const handleAddSuperTag = () => {
+    let newconfig = {...configuration};
+    newconfig.config.inbox.superTags.push({
+      id: '',
+      title: '',
+      fields: []
+    });
+    setSavedState("saving");
+    chrome.storage.sync.set({ configuration: newconfig }).then(() => {
+      setConfiguration(newconfig);
+      setSavedState("saved");
+    });
+  };
+
+  const handleDeleteSuperTag = (index: number) => {
+    let newconfig = {...configuration};
+    newconfig.config.inbox.superTags.splice(index, 1);
+    setSavedState("saving");
+    chrome.storage.sync.set({ configuration: newconfig }).then(() => {
+      setConfiguration(newconfig);
+      setSavedState("saved");
+    });
+  };
+
   if (shouldLoadConfig) {
     return <div>Loading...</div>
   }
@@ -90,39 +126,99 @@ const ConfigurationPanel = ({ closeHandler }) => {
             return (
               <div key={i}>
                 <h2>{schema_elem.label}</h2>
-                {schema_elem.properties.map((property_elem, j) => {
-                  if (property_elem.type == "string") {
-                    return (
-                      <div key={j}>
-                        <TextField style={{ width: '100%' }}
-                          autoFocus={count != 1}
-                          value={config[property_elem.key]}
-                          onChange={e => saveConfiguration(schema_elem.key, property_elem.key, e.target.value)}
-                          variant="outlined"
-                          label={property_elem.label}
-                          disabled={property_elem.disabled}
-                        />
-                        <div style={{ height: '12px' }} />
-                      </div>
-                    )
-                  }
-                  else if (property_elem.type == "boolean") {
-                    return (
-                      <div key={j}>
-                        <FormControlLabel style={{ width: '100%' }}
-                          control={
-                            <Switch
-                              checked={config[property_elem.key] == true}
-                              onChange={e => handleToggle(schema_elem.key, property_elem.key)}
-                            />}
-                          label={property_elem.label}
-                          disabled={property_elem.disabled}
-                        />
-                        <div style={{ height: '12px' }} />
-                      </div>
-                    )
-                  }
-                })}
+                {schema_elem.key === 'inbox' ? (
+                  <>
+                    {schema_elem.properties
+                      .filter(prop => ['pushinbox', 'tanaapikey'].includes(prop.key))
+                      .map((property_elem, j) => {
+                        if (property_elem.type === "boolean") {
+                          return (
+                            <div key={j}>
+                              <FormControlLabel
+                                style={{ width: '100%' }}
+                                control={
+                                  <Switch
+                                    checked={config[property_elem.key] === true}
+                                    onChange={e => handleToggle(schema_elem.key, property_elem.key)}
+                                  />
+                                }
+                                label={property_elem.label}
+                                disabled={property_elem.disabled}
+                              />
+                              <div style={{ height: '12px' }} />
+                            </div>
+                          );
+                        } else if (property_elem.type === "string") {
+                          return (
+                            <div key={j}>
+                              <TextField
+                                style={{ width: '100%' }}
+                                value={config[property_elem.key]}
+                                onChange={e => saveConfiguration(schema_elem.key, property_elem.key, e.target.value)}
+                                variant="outlined"
+                                label={property_elem.label}
+                                disabled={property_elem.disabled}
+                              />
+                              <div style={{ height: '12px' }} />
+                            </div>
+                          );
+                        }
+                      })}
+                    
+                    <Typography variant="h6" sx={{ mt: 2, mb: 2 }}>Super Tags</Typography>
+                    {config.superTags?.length > 0 ? (
+                      <SuperTagCard
+                        superTags={config.superTags}
+                        onUpdate={handleUpdateSuperTag}
+                        onDelete={handleDeleteSuperTag}
+                        onAdd={handleAddSuperTag}
+                      />
+                    ) : (
+                      <Button
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                        onClick={handleAddSuperTag}
+                        size="small"
+                      >
+                        Add First Super Tag
+                      </Button>
+                    )}
+                  </>
+                ) : (
+                  schema_elem.properties.map((property_elem, j) => {
+                    if (property_elem.type == "string") {
+                      return (
+                        <div key={j}>
+                          <TextField style={{ width: '100%' }}
+                            autoFocus={count != 1}
+                            value={config[property_elem.key]}
+                            onChange={e => saveConfiguration(schema_elem.key, property_elem.key, e.target.value)}
+                            variant="outlined"
+                            label={property_elem.label}
+                            disabled={property_elem.disabled}
+                          />
+                          <div style={{ height: '12px' }} />
+                        </div>
+                      )
+                    }
+                    else if (property_elem.type == "boolean") {
+                      return (
+                        <div key={j}>
+                          <FormControlLabel style={{ width: '100%' }}
+                            control={
+                              <Switch
+                                checked={config[property_elem.key] == true}
+                                onChange={e => handleToggle(schema_elem.key, property_elem.key)}
+                              />}
+                            label={property_elem.label}
+                            disabled={property_elem.disabled}
+                          />
+                          <div style={{ height: '12px' }} />
+                        </div>
+                      )
+                    }
+                  })
+                )}
               </div>
             )
           })}
@@ -132,5 +228,118 @@ const ConfigurationPanel = ({ closeHandler }) => {
   }
 }
 
+const SuperTagCard = ({ superTags, onUpdate, onDelete, onAdd }) => {
+  const [selectedTab, setSelectedTab] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setSelectedTab(newValue);
+  };
+
+  // 当前选中的 superTag
+  const currentTag = superTags[selectedTab];
+
+  return (
+    <Card sx={{ mb: 2 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs 
+          value={selectedTab} 
+          onChange={handleTabChange}
+          variant="scrollable"
+          scrollButtons="auto"
+        >
+          {superTags.map((tag, index) => (
+            <Tab 
+              key={index} 
+              label={tag.title || `Tag ${index + 1}`}
+              sx={{ minHeight: '48px' }}
+            />
+          ))}
+          <Tab 
+            icon={<AddIcon />} 
+            aria-label="add tag"
+            onClick={(e) => {
+              e.stopPropagation();
+              onAdd();
+            }}
+            sx={{ minWidth: '48px', minHeight: '48px' }}
+          />
+        </Tabs>
+      </Box>
+
+      {currentTag && (
+        <Box sx={{ p: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+            <Typography variant="h6">
+              {currentTag.title || `Super Tag ${selectedTab + 1}`}
+            </Typography>
+            <IconButton 
+              color="error" 
+              onClick={() => onDelete(selectedTab)}
+              size="small"
+            >
+              <DeleteIcon />
+            </IconButton>
+          </Box>
+
+          <TextField
+            label="Super Tag Title"
+            value={currentTag.title}
+            onChange={(e) => onUpdate(selectedTab, { ...currentTag, title: e.target.value })}
+            fullWidth
+            size="small"
+            sx={{ mb: 2 }}
+          />
+          
+          <TextField
+            label="Super Tag ID"
+            value={currentTag.id}
+            onChange={(e) => onUpdate(selectedTab, { ...currentTag, id: e.target.value })}
+            fullWidth
+            size="small"
+            sx={{ mb: 2 }}
+          />
+          
+          <Typography variant="subtitle2" sx={{ mb: 1 }}>Fields</Typography>
+          {currentTag.fields.map((field, index) => (
+            <Box key={index} sx={{ display: 'flex', gap: 1, mb: 1 }}>
+              <TextField
+                label="Field ID"
+                value={field.id}
+                onChange={(e) => {
+                  const newFields = [...currentTag.fields];
+                  newFields[index] = { id: e.target.value };
+                  onUpdate(selectedTab, { ...currentTag, fields: newFields });
+                }}
+                fullWidth
+                size="small"
+              />
+              <IconButton 
+                onClick={() => {
+                  const newFields = currentTag.fields.filter((_, i) => i !== index);
+                  onUpdate(selectedTab, { ...currentTag, fields: newFields });
+                }}
+                size="small"
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
+          ))}
+          
+          <Button
+            startIcon={<AddIcon />}
+            onClick={() => onUpdate(selectedTab, {
+              ...currentTag,
+              fields: [...currentTag.fields, { id: '' }]
+            })}
+            size="small"
+            sx={{ mt: 1 }}
+          >
+            Add Field
+          </Button>
+        </Box>
+      )}
+    </Card>
+  );
+};
 
 export default ConfigurationPanel;

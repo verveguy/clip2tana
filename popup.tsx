@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FormControlLabel, FormGroup, IconButton, Switch, TextareaAutosize, TextField } from "@mui/material";
+import { FormControlLabel, FormGroup, IconButton, Switch, TextareaAutosize, TextField, FormControl, Select, MenuItem } from "@mui/material";
 import { get_default_configuration, merge_config } from "./Configuration";
 import ConfigurationPanel from "~options";
 
@@ -60,6 +60,9 @@ function ClipPopup() {
   const [fetchClipping, setFetchClipping] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [disableSendtoTana, setDisableSendtoTana] = useState(false);
+  const [selectedTagIndex, setSelectedTagIndex] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // install event handler on load
   useEffect(() => {
@@ -146,11 +149,22 @@ function ClipPopup() {
   }
 
   function sendToTana() {
-    // send to Tana Input API
-    // or Tana Helper queue?
-    pushDataToEndpoint(nodes, configuration.config.inbox.tanaapikey)
+    setIsSending(true);
+    const selectedNodes = {
+      targetNodeId: nodes.targetNodeId,
+      nodes: [nodes.nodes[selectedTagIndex]]
+    };
+    
+    pushDataToEndpoint(selectedNodes, configuration.config.inbox.tanaapikey)
       .then(() => {
-        close();
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+          close();
+        }, 1500);
+      })
+      .finally(() => {
+        setIsSending(false);
       });
   }
 
@@ -173,12 +187,45 @@ function ClipPopup() {
       <div style={{ width: 600, height: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2>Clip2Tana</h2>
-          <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <Select
+              value={selectedTagIndex}
+              onChange={(e) => setSelectedTagIndex(e.target.value)}
+              size="small"
+              style={{ minWidth: 120 }}
+            >
+              {configuration.config.inbox.superTags.map((tag, index) => (
+                <MenuItem key={index} value={index}>
+                  {tag.title || `SuperTag ${index + 1}`}
+                </MenuItem>
+              ))}
+            </Select>
             <button onClick={openOptionsPage}>Settings</button>
-            <button onClick={sendToTana} disabled={disableSendtoTana}>Send to Tana</button>
+            <button 
+              onClick={sendToTana} 
+              disabled={disableSendtoTana || isSending}
+            >
+              {isSending ? "Sending..." : "Send to Tana"}
+            </button>
             <button onClick={copyToClipboard}>Copy</button>
           </div>
         </div>
+
+        {showSuccess && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '4px',
+            zIndex: 1000
+          }}>
+            Sent to Tana!
+          </div>
+        )}
 
         <TextareaAutosize style={{ width: '100%' }}
           autoFocus={true}
