@@ -13,6 +13,7 @@ import { FormControlLabel, FormGroup, IconButton, Switch, TextField, Card, Typog
 import { get_default_configuration, merge_config } from "./Configuration";
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import { endpointUrl } from "~background";
 
 const ConfigurationPanel = ({ closeHandler }) => {
   const [savedState, setSavedState] = useState("Initial");
@@ -82,13 +83,16 @@ const ConfigurationPanel = ({ closeHandler }) => {
     });
   };
 
-  const handleAddSuperTag = () => {
-    let newconfig = {...configuration};
-    newconfig.config.inbox.superTags.push({
+  const handleAddSuperTag = async () => {
+    const newTag = {
       id: '',
       title: '',
       fields: []
-    });
+    };
+
+    // 只更新本地配置，不调用API
+    let newconfig = {...configuration};
+    newconfig.config.inbox.superTags.push(newTag);
     setSavedState("saving");
     chrome.storage.sync.set({ configuration: newconfig }).then(() => {
       setConfiguration(newconfig);
@@ -172,6 +176,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
                         onUpdate={handleUpdateSuperTag}
                         onDelete={handleDeleteSuperTag}
                         onAdd={handleAddSuperTag}
+                        configuration={configuration}
                       />
                     ) : (
                       <Button
@@ -228,7 +233,7 @@ const ConfigurationPanel = ({ closeHandler }) => {
   }
 }
 
-const SuperTagCard = ({ superTags, onUpdate, onDelete, onAdd }) => {
+const SuperTagCard = ({ superTags, onUpdate, onDelete, onAdd, configuration }) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -237,6 +242,44 @@ const SuperTagCard = ({ superTags, onUpdate, onDelete, onAdd }) => {
 
   // 当前选中的 superTag
   const currentTag = superTags[selectedTab];
+
+  const handleTitleChange = async (index: number, newTitle: string, currentTag: any) => {
+    // 如果是第一次设置title（即从空字符串改变），尝试创建supertag
+    if (currentTag.title === '' && newTitle.trim() !== '' && configuration.config.inbox.tanaapikey) {
+      try {
+        const payload = {
+          targetNodeId: 'SCHEMA',
+          nodes: [{
+            name: newTitle.trim(),
+            supertags: [{ id: 'SYS_T01' }]
+          }]
+        };
+
+        const response = await fetch(endpointUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: 'Bearer ' + configuration.config.inbox.tanaapikey,
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.text();
+          if (!errorBody.includes("already exists")) {
+            console.error("Failed to create supertag:", errorBody);
+            // 可以添加用户提示
+            return;
+          }
+        }
+      } catch (error) {
+        console.error("Error creating supertag:", error);
+      }
+    }
+
+    // 更新本地状态
+    onUpdate(index, { ...currentTag, title: newTitle });
+  };
 
   return (
     <Card sx={{ mb: 2 }}>
@@ -284,7 +327,7 @@ const SuperTagCard = ({ superTags, onUpdate, onDelete, onAdd }) => {
           <TextField
             label="Super Tag Title"
             value={currentTag.title}
-            onChange={(e) => onUpdate(selectedTab, { ...currentTag, title: e.target.value })}
+            onChange={(e) => handleTitleChange(selectedTab, e.target.value, currentTag)}
             fullWidth
             size="small"
             sx={{ mb: 2 }}
@@ -336,6 +379,30 @@ const SuperTagCard = ({ superTags, onUpdate, onDelete, onAdd }) => {
           >
             Add Field
           </Button>
+          
+          <Typography 
+            variant="caption" 
+            color="textSecondary" 
+            sx={{ 
+              display: 'block', 
+              mt: 2, 
+              mb: 1,
+              '& ol': {
+                margin: '8px 0 0 0',
+                paddingLeft: '20px'
+              },
+              '& li': {
+                marginBottom: '4px'
+              }
+            }}
+          >
+            Note: For new Super Tags, you need to get the ID from Tana client:
+            <ol>
+              <li>Open the supertag configuration panel in Tana</li>
+              <li>Run "Show API Schema" command on the supertag title</li>
+              <li>Copy the ID and paste it into the "Super Tag ID" field above</li>
+            </ol>
+          </Typography>
         </Box>
       )}
     </Card>

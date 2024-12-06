@@ -215,7 +215,7 @@ async function askContentScript(message, tab = undefined) {
 }
 
 
-const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
+export const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
 
 async function pushDataToEndpoint(payload: any, token: string) {
   console.log("Pushing data to endpoint", payload);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FormControlLabel, FormGroup, IconButton, Switch, TextareaAutosize, TextField, FormControl, Select, MenuItem } from "@mui/material";
+import { TextareaAutosize, Select, MenuItem } from "@mui/material";
 import { get_default_configuration, merge_config } from "./Configuration";
 import ConfigurationPanel from "~options";
 
@@ -9,12 +9,6 @@ import ConfigurationPanel from "~options";
   content.js
 */
 
-async function getCurrentTab() {
-  let queryOptions = { active: true, lastFocusedWindow: true };
-  // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
-}
 
 // send a message to the background.js worker
 async function askServiceWorker(message) {
@@ -49,6 +43,29 @@ async function pushDataToEndpoint(payload: any, token:string) {
     }
   } catch (error) {
     console.error("An error occurred while pushing data:", error);
+  }
+}
+
+// 添加创建supertag的函数
+async function createNewSupertag(name: string, description: string, token: string) {
+  const payload = {
+    targetNodeId: 'SCHEMA',
+    nodes: [
+      {
+        name: name,
+        description: description,
+        supertags: [{id: 'SYS_T01'}]
+      }
+    ]
+  };
+
+  try {
+    await pushDataToEndpoint(payload, token);
+    // 成功创建后需要用户手动在Tana客户端获取新supertag的ID
+    return true;
+  } catch (error) {
+    console.error("Failed to create supertag:", error);
+    return false;
   }
 }
 
@@ -190,7 +207,7 @@ function ClipPopup() {
           <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Select
               value={selectedTagIndex}
-              onChange={(e) => setSelectedTagIndex(e.target.value)}
+              onChange={(e) => setSelectedTagIndex(Number(e.target.value))}
               size="small"
               style={{ minWidth: 120 }}
             >
