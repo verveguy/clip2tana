@@ -173,46 +173,43 @@ const resolvePath = (object, path, defaultValue) => path
   .reduce((o, p) => o ? o[p] : defaultValue, object)
 
 export function nodes_format(title, clipping, fields, params): Payload {
-  const nodes: Node[] = [];
-  const targetNodeId = 'INBOX';
+  // 修改：使用 'INBOX' 作为固定的 targetNodeId
+  const targetNodeId = 'INBOX';  // 不要使用 superTag 的 ID 作为 targetNodeId
 
-  // 为每个 SuperTag 创建一个独立的节点
+  const nodes: Node[] = [];
   params.inbox.superTags.forEach(superTag => {
+    if (!superTag.id) {
+      console.warn('SuperTag missing ID:', superTag);
+      return;
+    }
+
     const node: Node = {
       name: title,
       supertags: [{ id: superTag.id }],
       children: []
     };
 
-    // 添加描述
+    // URL 处理
+    let urlField = fields.find((f) => f[0] === 'Url');
+    if (urlField) {
+      node.children.push({
+        dataType: "url",  // 添加 dataType
+        name: urlField[1]
+      });
+    }
+
+    // 描述处理
     let descField = fields.find((field) => field[0] === 'Description');
     if (descField) {
       node.description = descField[1];
     }
 
-    // 为该 SuperTag 的每个 field 添加 URL
-    superTag.fields.forEach(field => {
-      let urlField = fields.find((f) => f[0] === 'Url');
-      if (urlField) {
-        const urlNode: Field = {
-          type: 'field',
-          attributeId: field.id, // 使用 field 中定义的 id
-          children: [
-            {
-              name: urlField[1]
-            }
-          ]
-        };
-        node.children.push(urlNode);
-      }
-    });
-
-    // 添加其他内容（保持不变）
-    clipping?.split('\n').forEach((para) => {
-      if (para != "</p>") {
-        node.children?.push({ name: para });
-      }
-    });
+    // 添加其他内容
+    if (clipping) {
+      node.children.push({
+        name: clipping
+      });
+    }
 
     nodes.push(node);
   });

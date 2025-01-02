@@ -21,11 +21,14 @@ async function askServiceWorker(message) {
 const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
 
 async function pushDataToEndpoint(payload: any, token:string) {
-
   console.log("Pushing data to endpoint", payload);
 
   try {
-    console.log("Pushing data to endpoint", JSON.stringify(payload));
+    if (!payload.targetNodeId || !payload.nodes || !payload.nodes.length) {
+      console.error("Invalid payload structure:", payload);
+      return false;
+    }
+
     const response = await fetch(endpointUrl, {
       method: "POST",
       headers: {
@@ -35,14 +38,25 @@ async function pushDataToEndpoint(payload: any, token:string) {
       body: JSON.stringify(payload),
     });
 
+    const responseData = await response.json();
+    console.log("Full Response from Tana:", responseData);
+
     if (response.ok) {
-      console.log("Data pushed successfully!");
+      if (responseData.children?.length > 0) {
+        const nodeId = responseData.children[0].nodeId;
+        console.log("Successfully created node with ID:", nodeId);
+        return true;
+      } else {
+        console.error("Response missing children array:", responseData);
+        return false;
+      }
     } else {
-      const errorBody = await response.text();
-      console.error("Failed to push data from popup:", errorBody);
+      console.error("API Error:", response.status, responseData);
+      return false;
     }
   } catch (error) {
-    console.error("An error occurred while pushing data:", error);
+    console.error("Network or parsing error:", error);
+    return false;
   }
 }
 
@@ -177,7 +191,6 @@ function ClipPopup() {
         setShowSuccess(true);
         setTimeout(() => {
           setShowSuccess(false);
-          close();
         }, 1500);
       })
       .finally(() => {
@@ -201,15 +214,48 @@ function ClipPopup() {
   }
   else {
     return (
-      <div style={{ width: 600, height: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ width: 600, minHeight: '100%' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 1
+        }}>
           <h2>Clip2Tana</h2>
-          <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ 
+            width: 400, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center'
+          }}>
             <Select
               value={selectedTagIndex}
               onChange={(e) => setSelectedTagIndex(Number(e.target.value))}
               size="small"
               style={{ minWidth: 120 }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: '80vh',
+                    overflow: 'auto'
+                  }
+                },
+                anchorOrigin: {
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                },
+                transformOrigin: {
+                  vertical: 'top',
+                  horizontal: 'left'
+                },
+                sx: {
+                  '& .MuiMenu-paper': {
+                    width: 'auto',
+                    marginTop: '4px'
+                  }
+                }
+              }}
             >
               {configuration.config.inbox.superTags.map((tag, index) => (
                 <MenuItem key={index} value={index}>
