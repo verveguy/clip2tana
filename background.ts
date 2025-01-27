@@ -69,17 +69,16 @@ chrome.tabs.onActivated.addListener(function () {
 // typically via the keyboard shortcut
 
 chrome.commands.onCommand.addListener((command) => {
-  // invoke the main code within the context of the foreground 
-  // chrome tab process. Note we do not expect a response from
-  // this message
   console.log("Background got extension command: " + command);
-  // close popup if it's open
-      //   chrome.runtime.sendMessage({"tana-clip-done"});
 
   askContentScript({ command: "clip2tana", configuration: configuration })
     .then((response) => { 
       if (configuration.config.inbox.pushinbox) {
-        pushDataToEndpoint(response.nodes, configuration.config.inbox.tanaapikey);
+        pushDataToEndpoint(response.nodes, configuration.config.inbox.tanaapikey)
+          .catch(error => {
+            console.error("Failed to push data:", error);
+            // 这里可以添加错误通知逻辑
+          });
       }
       console.log("Background command action complete");
     });
@@ -216,10 +215,9 @@ async function askContentScript(message, tab = undefined) {
 }
 
 
-const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
+export const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
 
-async function pushDataToEndpoint(payload: any, token:string) {
-
+async function pushDataToEndpoint(payload: any, token: string) {
   console.log("Pushing data to endpoint", payload);
 
   try {
@@ -232,13 +230,12 @@ async function pushDataToEndpoint(payload: any, token:string) {
       body: JSON.stringify(payload),
     });
 
-    if (response.ok) {
-      console.log("Data pushed successfully!");
-    } else {
+    if (!response.ok) {
       const errorBody = await response.text();
-      console.error("Failed to push data from worker:", errorBody);
+      throw new Error(`Failed to push data: ${errorBody}`);
     }
   } catch (error) {
     console.error("An error occurred while pushing data:", error);
+    throw error;
   }
 }

@@ -15,8 +15,15 @@ const default_config =
   },
   inbox: {
     pushinbox: false,
-    supertag: '',
-    urlfieldid: '',
+    superTags: [
+      {
+        id: '',
+        title: '',
+        fields: [
+          { id: '' }
+        ]
+      }
+    ],
     tanaapikey: '',
   },
   opengraph: {
@@ -58,12 +65,9 @@ const default_schema =
           label: "Push to inbox by default", type: "boolean",
         },
         {
-          key: "supertag",
-          label: "Supertag Node ID", type: "string",
-        },
-        {
-          key: "urlfieldid",
-          label: "URL Field Node ID", type: "string",
+          key: "superTags",
+          label: "Super Tags",
+          type: "superTags",
         },
         {
           key: "tanaapikey",

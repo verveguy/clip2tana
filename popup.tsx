@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FormControlLabel, FormGroup, IconButton, Switch, TextareaAutosize, TextField } from "@mui/material";
+import { TextareaAutosize, Select, MenuItem } from "@mui/material";
 import { get_default_configuration, merge_config } from "./Configuration";
 import ConfigurationPanel from "~options";
 
@@ -9,12 +9,6 @@ import ConfigurationPanel from "~options";
   content.js
 */
 
-async function getCurrentTab() {
-  let queryOptions = { active: true, lastFocusedWindow: true };
-  // `tab` will either be a `tabs.Tab` instance or `undefined`.
-  let [tab] = await chrome.tabs.query(queryOptions);
-  return tab;
-}
 
 // send a message to the background.js worker
 async function askServiceWorker(message) {
@@ -27,11 +21,14 @@ async function askServiceWorker(message) {
 const endpointUrl = "https://europe-west1-tagr-prod.cloudfunctions.net/addToNodeV2";
 
 async function pushDataToEndpoint(payload: any, token:string) {
-
   console.log("Pushing data to endpoint", payload);
 
   try {
-    console.log("Pushing data to endpoint", JSON.stringify(payload));
+    if (!payload.targetNodeId || !payload.nodes || !payload.nodes.length) {
+      console.error("Invalid payload structure:", payload);
+      return false;
+    }
+
     const response = await fetch(endpointUrl, {
       method: "POST",
       headers: {
@@ -41,14 +38,48 @@ async function pushDataToEndpoint(payload: any, token:string) {
       body: JSON.stringify(payload),
     });
 
+    const responseData = await response.json();
+    console.log("Full Response from Tana:", responseData);
+
     if (response.ok) {
-      console.log("Data pushed successfully!");
+      if (responseData.children?.length > 0) {
+        const nodeId = responseData.children[0].nodeId;
+        console.log("Successfully created node with ID:", nodeId);
+        return true;
+      } else {
+        console.error("Response missing children array:", responseData);
+        return false;
+      }
     } else {
-      const errorBody = await response.text();
-      console.error("Failed to push data from popup:", errorBody);
+      console.error("API Error:", response.status, responseData);
+      return false;
     }
   } catch (error) {
-    console.error("An error occurred while pushing data:", error);
+    console.error("Network or parsing error:", error);
+    return false;
+  }
+}
+
+// 添加创建supertag的函数
+async function createNewSupertag(name: string, description: string, token: string) {
+  const payload = {
+    targetNodeId: 'SCHEMA',
+    nodes: [
+      {
+        name: name,
+        description: description,
+        supertags: [{id: 'SYS_T01'}]
+      }
+    ]
+  };
+
+  try {
+    await pushDataToEndpoint(payload, token);
+    // 成功创建后需要用户手动在Tana客户端获取新supertag的ID
+    return true;
+  } catch (error) {
+    console.error("Failed to create supertag:", error);
+    return false;
   }
 }
 
@@ -60,6 +91,9 @@ function ClipPopup() {
   const [fetchClipping, setFetchClipping] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [disableSendtoTana, setDisableSendtoTana] = useState(false);
+  const [selectedTagIndex, setSelectedTagIndex] = useState(0);
+  const [isSending, setIsSending] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   // install event handler on load
   useEffect(() => {
@@ -146,11 +180,21 @@ function ClipPopup() {
   }
 
   function sendToTana() {
-    // send to Tana Input API
-    // or Tana Helper queue?
-    pushDataToEndpoint(nodes, configuration.config.inbox.tanaapikey)
+    setIsSending(true);
+    const selectedNodes = {
+      targetNodeId: nodes.targetNodeId,
+      nodes: [nodes.nodes[selectedTagIndex]]
+    };
+    
+    pushDataToEndpoint(selectedNodes, configuration.config.inbox.tanaapikey)
       .then(() => {
-        close();
+        setShowSuccess(true);
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 1500);
+      })
+      .finally(() => {
+        setIsSending(false);
       });
   }
 
@@ -170,15 +214,81 @@ function ClipPopup() {
   }
   else {
     return (
-      <div style={{ width: 600, height: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ width: 600, minHeight: '100%' }}>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          position: 'relative',
+          zIndex: 1
+        }}>
           <h2>Clip2Tana</h2>
-          <div style={{ height: 20, width: 400, display: 'flex', justifyContent: 'space-between' }}>
+          <div style={{ 
+            width: 400, 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center'
+          }}>
+            <Select
+              value={selectedTagIndex}
+              onChange={(e) => setSelectedTagIndex(Number(e.target.value))}
+              size="small"
+              style={{ minWidth: 120 }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: '80vh',
+                    overflow: 'auto'
+                  }
+                },
+                anchorOrigin: {
+                  vertical: 'bottom',
+                  horizontal: 'left'
+                },
+                transformOrigin: {
+                  vertical: 'top',
+                  horizontal: 'left'
+                },
+                sx: {
+                  '& .MuiMenu-paper': {
+                    width: 'auto',
+                    marginTop: '4px'
+                  }
+                }
+              }}
+            >
+              {configuration.config.inbox.superTags.map((tag, index) => (
+                <MenuItem key={index} value={index}>
+                  {tag.title || `SuperTag ${index + 1}`}
+                </MenuItem>
+              ))}
+            </Select>
             <button onClick={openOptionsPage}>Settings</button>
-            <button onClick={sendToTana} disabled={disableSendtoTana}>Send to Tana</button>
+            <button 
+              onClick={sendToTana} 
+              disabled={disableSendtoTana || isSending}
+            >
+              {isSending ? "Sending..." : "Send to Tana"}
+            </button>
             <button onClick={copyToClipboard}>Copy</button>
           </div>
         </div>
+
+        {showSuccess && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            padding: '10px 20px',
+            borderRadius: '4px',
+            zIndex: 1000
+          }}>
+            Sent to Tana!
+          </div>
+        )}
 
         <TextareaAutosize style={{ width: '100%' }}
           autoFocus={true}

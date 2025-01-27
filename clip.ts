@@ -173,66 +173,46 @@ const resolvePath = (object, path, defaultValue) => path
   .reduce((o, p) => o ? o[p] : defaultValue, object)
 
 export function nodes_format(title, clipping, fields, params): Payload {
+  // 修改：使用 'INBOX' 作为固定的 targetNodeId
+  const targetNodeId = 'INBOX';  // 不要使用 superTag 的 ID 作为 targetNodeId
+
   const nodes: Node[] = [];
-  const targetNodeId = 'INBOX'; // TODO: consider making this configurable
-
-  const node: Node = {
-    name: title,
-    supertags: [{ id: params.inbox.supertag }],
-    children: []
-  };
-
-  let descField = fields.find((field) => field[0] === 'Description');
-  let description = descField ? descField[1] : undefined
-  console.log("description", description);
-  if (description) {
-    node.description = description;
-  }
-
-  let urlField = fields.find((field) => field[0] === 'Url');
-  const url = urlField ? urlField[1] : undefined;
-  console.log("url", url);
-  if (url) {
-    const urlNode: Field = {
-      type: 'field',
-      attributeId: params.inbox.urlfieldid,
-      children: [
-        {
-          name: url
-        }
-      ]
-    };
-    node.children.push(urlNode);
-  }
-
-
-  fields.forEach((field) => {
-    const fieldID = resolvePath(params.opengraph, field[0], undefined);
-    if (!fieldID) {
+  params.inbox.superTags.forEach(superTag => {
+    if (!superTag.id) {
+      console.warn('SuperTag missing ID:', superTag);
       return;
     }
 
-    const fieldNode: Field = {
-      type: 'field',
-      attributeId: fieldID,
-      children: [
-        {
-          name: field[1]
-        }
-      ]
+    const node: Node = {
+      name: title,
+      supertags: [{ id: superTag.id }],
+      children: []
     };
 
-    node.children?.push(fieldNode);
-  });
-
-  // add clipping as a node but strip all newlines
-  clipping?.split('\n').forEach((para) => {
-    if (para != "</p>") {
-      node.children?.push({ name: para });
+    // URL 处理
+    let urlField = fields.find((f) => f[0] === 'Url');
+    if (urlField) {
+      node.children.push({
+        dataType: "url",  // 添加 dataType
+        name: urlField[1]
+      });
     }
-  });
 
-  nodes.push(node);
+    // 描述处理
+    let descField = fields.find((field) => field[0] === 'Description');
+    if (descField) {
+      node.description = descField[1];
+    }
+
+    // 添加其他内容
+    if (clipping) {
+      node.children.push({
+        name: clipping
+      });
+    }
+
+    nodes.push(node);
+  });
 
   return { targetNodeId, nodes };
 }
